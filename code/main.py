@@ -1,5 +1,3 @@
-print(1)
-
-####toann
+###toann
 print("TOANNN")
 ####
