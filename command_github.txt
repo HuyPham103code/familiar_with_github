@@ -1,0 +1,10 @@
+*   Branch
+- list branch: git branch
+- create a new branch: git branch <branch-name>
+- switch branch: git checkout branch <branch-name>
+* Commit:
+- git commit -m "The content of that commit"
+* Git push
+- git push origin <branch-name> (don't push on main)
+* Git pull (clone the lastest version code in main branch)
+- git pull
