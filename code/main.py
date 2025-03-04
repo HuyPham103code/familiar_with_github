@@ -1,3 +1,8 @@
 ###toann
-print("TOANNN")
+print("tòn")
 ####
+
+def show():
+    print("github everywhere")
+
+show()
