@@ -1,42 +1,51 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
   branches:
-      include:
-        - main
+    include:
+      - main
+
+pr:
+  branches:
+    include:
+      - main
 
 pool:
   name: 'test'
 
 steps:
-- script: echo "test commit and update task id"
-  displayName: 'starting pipeline'
+- checkout: self
+  persistCredentials: true
+
+- script: echo "Pipeline triggered by merge into main branch"
+  displayName: 'Starting pipeline'
 
 - script: |
-    echo "Get commit commit..."
-    git log -1 --pretty=format:"%s" > commit_message.txt
-    
-    echo "Extract task id from commit..."
-    TASK_ID=$(grep -oP 'Task#\d+' commit_message.txt | cut -d'#' -f2)
-    
-    if [ -n "$TASK_ID" ]; then
-        echo "Find Task ID: $TASK_ID"
-        
-        echo "Send commit to Task ID $TASK_ID..."
-        
-        az devops invoke --area workitems --resource workItems \
-        --route-parameters id=$TASK_ID \
-        --http-method PATCH \
-        --in-file comment.json
-        
-        echo "Comment successfully!"
-    else
-        echo "Not found task id in commit."
-    fi
-  displayName: 'comment in task id'
+    echo "Check if the latest commit is a merge commit..."
 
-- script: echo "complete pipeline"
-  displayName: 'complete Pipeline'
+    COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+    echo "Latest commit message: $COMMIT_MESSAGE"
+
+    if [[ "$COMMIT_MESSAGE" == *"Merge"* ]]; then
+        echo "This is a merge commit. Proceeding with task ID extraction..."
+
+        TASK_ID=$(echo "$COMMIT_MESSAGE" | grep -oP 'Task#\d+' | cut -d'#' -f2)
+
+        if [ -n "$TASK_ID" ]; then
+            echo "Found Task ID: $TASK_ID"
+            echo "Sending commit to Task ID $TASK_ID..."
+
+            az devops invoke --area workitems --resource workItems \
+            --route-parameters id=$TASK_ID \
+            --http-method PATCH \
+            --in-file comment.json
+
+            echo "Comment successfully!"
+        else
+            echo "No task ID found in commit message."
+        fi
+    else
+        echo "Not a merge commit. Skipping task ID processing."
+    fi
+  displayName: 'Process merge commit and comment in task ID'
+
+- script: echo "Complete pipeline"
+  displayName: 'Complete Pipeline'
