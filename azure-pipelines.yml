@@ -14,17 +14,6 @@ pool:
 steps:
 - checkout: self
   persistCredentials: true
-
-- powershell: |
-    Write-Output "Installing Azure CLI using PowerShell Script..."
-
-    # Cài đặt Azure CLI qua PowerShell mà không dùng Windows Installer Service
-    Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://aka.ms/installazurecliwindows')
-
-    # Kiểm tra phiên bản Azure CLI
-    Write-Output "Checking Azure CLI version..."
-    az --version
-  displayName: 'Install Azure CLI (PowerShell)'
   
 - powershell: |
     Write-Output "Checking latest commit message..."
