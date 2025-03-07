@@ -50,5 +50,4 @@ steps:
     } else {
         Write-Output "No Task ID found in commit message."
     }
-  displayName: 'Process commit and comment in task ID (PowerShell)'
-
+  displayName: 'Process merge commit and comment in task ID (PowerShell)'
