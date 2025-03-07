@@ -15,12 +15,18 @@ steps:
 - checkout: self
   persistCredentials: true
 
+# Cài đặt Azure CLI trên agent self-hosted bằng PowerShell Script
 - powershell: |
-    Write-Output "Installing Azure CLI..."
-    Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi
-    Start-Process msiexec.exe -ArgumentList '/I AzureCLI.msi /quiet' -NoNewWindow -Wait
+    Write-Output "Installing Azure CLI using PowerShell Script..."
+
+    # Tải và cài đặt Azure CLI qua lệnh PowerShell
+    Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile AzureCLI.msi
+    Start-Process msiexec.exe -ArgumentList '/I AzureCLI.msi /quiet /norestart' -NoNewWindow -Wait
+
+    # Kiểm tra phiên bản Azure CLI
+    Write-Output "Checking Azure CLI version..."
     az --version
-  displayName: 'Install Azure CLI'
+  displayName: 'Install Azure CLI (PowerShell)'
   
 - powershell: |
     Write-Output "Checking latest commit message..."
