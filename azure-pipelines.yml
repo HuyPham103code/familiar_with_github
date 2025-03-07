@@ -56,11 +56,20 @@ steps:
         # Đăng nhập vào Azure DevOps bằng PAT
         $Env:AZURE_DEVOPS_EXT_PAT = "8Awke4Xri2RmMEAJjrdEJNUbh8sFHCcLV81auEcR5vJ1dy7wvH3MJQQJ99BCACAAAAAnzwFcAAASAZDO1sou"
 
-        # Gửi comment đến Task ID trong Azure DevOps bằng stdin
-        $commentJson | az devops invoke --area workitems --resource workItems `
-        --route-parameters id=$TASK_ID `
-        --http-method PATCH `
-        --organization $ORG_URL
+        # Tạo nội dung comment trong JSON payload
+        $commentJson = @(
+            @{
+                "op" = "add"
+                "path" = "/fields/System.History"
+                "value" = "Fixed bug for task $TASK_ID"
+            }
+        ) | ConvertTo-Json -Depth 2
+
+        # Sử dụng trực tiếp az boards work-item update với --fields
+        az boards work-item update `
+            --id $TASK_ID `
+            --fields "System.History=Fixed bug for task $TASK_ID" `
+            --organization https://dev.azure.com/silversea21
 
         if ($LASTEXITCODE -eq 0) {
             Write-Output "Comment successfully!"
