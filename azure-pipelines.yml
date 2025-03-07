@@ -41,6 +41,10 @@ steps:
         $TASK_ID = $TASK_ID_MATCH.Matches.Groups[1].Value
         Write-Output "Found Task ID: $TASK_ID"
 
+        # Đăng nhập vào Azure DevOps bằng PAT
+        $PAT = "8Awke4Xri2RmMEAJjrdEJNUbh8sFHCcLV81auEcR5vJ1dy7wvH3MJQQJ99BCACAAAAAnzwFcAAASAZDO1sou"
+        az devops login --organization $ORG_URL <<< $PAT
+
         # Gửi comment đến Task ID trong Azure DevOps
         Write-Output "Sending commit to Task ID $TASK_ID..."
         az devops invoke --area workitems --resource workItems `
