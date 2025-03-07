@@ -21,7 +21,7 @@ steps:
   displayName: 'Check Azure CLI in Pipeline'
   
 - powershell: |
-    Write-Output "Checking latest commit message..."
+    Write-Output "Checking latest commit message.."
 
     # Kiểm tra Git có hoạt động không
     git --version
