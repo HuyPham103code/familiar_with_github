@@ -4,6 +4,12 @@ Write-Output "Checking latest commit message..."
 # Điều hướng tới thư mục chứa repo
 Set-Location "D:\nam_3\github\familiar_with_github\familiar_with_github"
 
+Write-Output "Updating PATH for Azure CLI..."
+
+$Env:Path += ";C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin"
+
+Write-Output "Current PATH after update: $Env:Path"
+
 # Kiểm tra Git có hoạt động không
 git --version
 git status
