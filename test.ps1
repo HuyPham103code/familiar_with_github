@@ -21,7 +21,7 @@ git status
 # Lấy commit message gần nhất
 $COMMIT_MESSAGE = git log -1 --pretty=%B
 Write-Output "Latest commit message: $COMMIT_MESSAGE"
-
+$ORG_URL = "https://dev.azure.com/silversea21"
 # Tìm Task ID trong format [Task#....]
 $TASK_ID_MATCH = $COMMIT_MESSAGE | Select-String -Pattern "\[Task#(\d+)\]" -AllMatches
 Write-Output "Match result: $($TASK_ID_MATCH.Matches | ForEach-Object { $_.Value })"
@@ -35,7 +35,8 @@ if ($TASK_ID_MATCH.Matches.Count -gt 0) {
     az devops invoke --area workitems --resource workItems `
     --route-parameters id=$TASK_ID `
     --http-method PATCH `
-    --in-file comment.json
+    --in-file comment.json `
+    --organization $ORG_URL
 
     if ($LASTEXITCODE -eq 0) {
         Write-Output "Comment successfully!"
