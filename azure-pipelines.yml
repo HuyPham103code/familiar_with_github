@@ -33,6 +33,15 @@ steps:
 
     $ORG_URL = "https://dev.azure.com/silversea21"
 
+    # Nội dung comment trực tiếp dưới dạng JSON
+    $commentJson = @(
+        @{
+            "op" = "add"
+            "path" = "/fields/System.History"
+            "value" = "Fixed bug for task $TASK_ID"
+        }
+    ) | ConvertTo-Json -Depth 2
+
     # Tìm Task ID trong format [Task#....]
     $TASK_ID_MATCH = $COMMIT_MESSAGE | Select-String -Pattern "\[Task#(\d+)\]" -AllMatches
     Write-Output "Match result: $($TASK_ID_MATCH.Matches | ForEach-Object { $_.Value })"
@@ -52,7 +61,7 @@ steps:
         az devops invoke --area workitems --resource workItems `
         --route-parameters id=$TASK_ID `
         --http-method PATCH `
-        --in-file comment.json `
+        --body "$commentJson" `
         --organization $ORG_URL
 
         if ($LASTEXITCODE -eq 0) {
