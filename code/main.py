@@ -12,4 +12,7 @@ def show22312():
 
 
 show("test4")
+show("test4")
+show("test4")
+show("test4")
 show22312()
