@@ -1,7 +1,7 @@
 trigger:
   branches:
     include:
-      - main
+      - '*'
 
 pr:
   branches:
@@ -23,26 +23,20 @@ steps:
 - powershell: |
     Write-Output "Checking latest commit message.."
 
-    # Kiểm tra Git có hoạt động không
+    # check git
     git --version
     git status
 
-    # Lấy commit message gần nhất
+    # Get the latest commit message and author
     $COMMIT_MESSAGE = git log -1 --pretty=%B
+    $COMMIT_AUTHOR = git log -1 --pretty=format:'%an'
     Write-Output "Latest commit message: $COMMIT_MESSAGE"
+    Write-Output "Commit author: $COMMIT_AUTHOR"
 
+    # Define the Azure DevOps organization URL
     $ORG_URL = "https://dev.azure.com/silversea21"
 
-    # Nội dung comment trực tiếp dưới dạng JSON
-    $commentJson = @(
-        @{
-            "op" = "add"
-            "path" = "/fields/System.History"
-            "value" = "Fixed bug for task $TASK_ID"
-        }
-    ) | ConvertTo-Json -Depth 2
-
-    # Tìm Task ID trong format [Task#....]
+    # Extract Task ID in the format [Task#....]
     $TASK_ID_MATCH = $COMMIT_MESSAGE | Select-String -Pattern "\[Task#(\d+)\]" -AllMatches
     Write-Output "Match result: $($TASK_ID_MATCH.Matches | ForEach-Object { $_.Value })"
 
@@ -50,26 +44,23 @@ steps:
         $TASK_ID = $TASK_ID_MATCH.Matches.Groups[1].Value
         Write-Output "Found Task ID: $TASK_ID"
 
-        # Đăng nhập vào Azure DevOps bằng PAT
-        # $PAT = "8Awke4Xri2RmMEAJjrdEJNUbh8sFHCcLV81auEcR5vJ1dy7wvH3MJQQJ99BCACAAAAAnzwFcAAASAZDO1sou"
-        # az devops login --organization $ORG_URL <<< $PAT
-        # Đăng nhập vào Azure DevOps bằng PAT
-        $Env:AZURE_DEVOPS_EXT_PAT = "8Awke4Xri2RmMEAJjrdEJNUbh8sFHCcLV81auEcR5vJ1dy7wvH3MJQQJ99BCACAAAAAnzwFcAAASAZDO1sou"
+        # Set the Azure DevOps Personal Access Token (PAT) for authentication
+        if ($COMMIT_AUTHOR -eq "HuyPham"){
+            $Env:AZURE_DEVOPS_EXT_PAT = "8Awke4Xri2RmMEAJjrdEJNUbh8sFHCcLV81auEcR5vJ1dy7wvH3MJQQJ99BCACAAAAAnzwFcAAASAZDO1sou"
+        }
+        else {
+            $Env:AZURE_DEVOPS_EXT_PAT = "FYW5sNk1rHoqkzcK32wtc0bLTO2RWC5LcKSmerKLBMc3vGcmXwECJQQJ99BCACAAAAAnzwFcAAASAZDO29GW"
+        }
 
-        # Tạo nội dung comment trong JSON payload
-        $commentJson = @(
-            @{
-                "op" = "add"
-                "path" = "/fields/System.History"
-                "value" = "Fixed bug for task $TASK_ID"
-            }
-        ) | ConvertTo-Json -Depth 2
+        Write-Output "Current PAT: $Env:AZURE_DEVOPS_EXT_PAT"
+        # Prepare the comment content
+        $COMMENT_TEXT = "Fixed bug for task $TASK_ID by $COMMIT_AUTHOR"
 
-        # Sử dụng trực tiếp az boards work-item update với --fields
+        # Update the work item with the comment
         az boards work-item update `
             --id $TASK_ID `
-            --fields "System.History=Fixed bug for task $TASK_ID" `
-            --organization https://dev.azure.com/silversea21
+            --fields "System.History=$COMMENT_TEXT" `
+            --organization $ORG_URL
 
         if ($LASTEXITCODE -eq 0) {
             Write-Output "Comment successfully!"
